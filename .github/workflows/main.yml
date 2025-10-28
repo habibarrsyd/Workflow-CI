@@ -1,0 +1,64 @@
+name: MLflow CI Advanced (4 Poin)
+
+# Trigger: Jalankan setiap kali ada push ke branch 'main'
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-run-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Ambil kode dari repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Setup environment Conda sesuai 'conda.yaml'
+      - name: Set up Conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: mlflow-training-env
+          environment-file: MLProject/conda.yaml # Path ke file conda
+          auto-activate-base: false
+          shell: bash
+
+      # 3. [BASIC - 2 Pts] Jalankan training menggunakan MLflow
+      # 'mlflow run ./MLProject' akan otomatis membaca file 'MLProject'
+      # lalu menjalankan perintah 'python modelling.py'
+      # Ini akan menghasilkan folder 'mlruns'
+      - name: (BASIC) Run MLflow Project (Training)
+        shell: bash -l {0}
+        run: |
+          mlflow run ./MLProject
+
+      # 4. [SKILLED - 3 Pts] Simpan 'mlruns' sebagai artefak
+      # Ini mengambil folder 'mlruns' dan menyimpannya di GitHub
+      - name: (SKILLED) Upload MLflow artifacts (mlruns)
+        uses: actions/upload-artifact@v3
+        with:
+          name: mlflow-artifacts-model # Nama artefak
+          path: mlruns/ # Folder yang di-upload
+
+      # --- TAHAP ADVANCE (4 Poin) ---
+
+      # 5. Login ke Docker Hub
+      # Menggunakan 'secrets' yang akan kita set di Tahap 2
+      - name: (ADVANCE) Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 6. Build Docker Image
+      # GANTI 'nama-image-anda' dengan nama yang Anda inginkan
+      - name: (ADVANCE) Build Docker Image with MLflow
+        shell: bash -l {0}
+        run: |
+          mlflow build-docker --model-uri ./MLProject --name "${{ secrets.DOCKERHUB_USERNAME }}/nama-image-anda:latest"
+
+      # 7. Push Docker Image ke Docker Hub
+      # GANTI 'nama-image-anda' dengan nama yang SAMA
+      - name: (ADVANCE) Push Docker Image to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/nama-image-anda:latest
