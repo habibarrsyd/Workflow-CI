@@ -30,7 +30,7 @@ jobs:
       - name: (BASIC) Run MLflow Project (Training)
         shell: bash -l {0}
         run: |
-          mlflow run ./MLProject
+          mlflow run ./MLProject --experiment-name "Steel_Industry_Energy_Forecasting"
 
       # 4. [SKILLED - 3 Pts] Simpan 'mlruns' sebagai artefak
       # Ini mengambil folder 'mlruns' dan menyimpannya di GitHub

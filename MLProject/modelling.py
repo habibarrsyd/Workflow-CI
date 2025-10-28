@@ -109,53 +109,53 @@ def train_single_model_for_ci():
     X, y = prepare_time_series_features_target(df)
     X_train, X_test, y_train, y_test = time_series_split(X, y, train_ratio=0.8)
     
-    mlflow.set_experiment("Steel_Industry_Energy_Forecasting")
+    # Baris mlflow.set_experiment() dan with mlflow.start_run() sudah dihapus
     
     print("\nTraining Random Forest for CI/CD pipeline...")
-    with mlflow.start_run(run_name="Random_Forest_For_Docker"):
-        
-        # --- Model Definition ---
-        params = {
-            "n_estimators": 100,
-            "max_depth": 15,
-            "min_samples_split": 5,
-            "random_state": 42,
-            "n_jobs": -1
-        }
-        rf_model = RandomForestRegressor(**params)
-        rf_model.fit(X_train, y_train)
-        
-        # --- Predictions ---
-        y_pred_test = rf_model.predict(X_test)
-        
-        # --- Metrics ---
-        test_metrics = calculate_forecasting_metrics(y_test, y_pred_test)
-        
-        # --- Logging to MLflow ---
-        print("Logging parameters, metrics, and model to MLflow...")
-        
-        # 1. Log Parameters
-        mlflow.log_params(params)
-        
-        # 2. Log Metrics
-        # Ubah nama metrik agar valid (ganti / dengan _)
-        test_metrics_renamed = {f"test_{k}": v for k, v in test_metrics.items()}
-        mlflow.log_metrics(test_metrics_renamed)
-        
-        # 3. Log Artifact (Plot)
-        plot_file = create_forecast_visualization(y_test, y_pred_test, "Random Forest", X_test.index)
-        mlflow.log_artifact(plot_file)
-        
-        # 4. Log Model (Paling Penting)
-        # Simpan dengan nama "model" agar mlflow build-docker menemukannya
-        mlflow.sklearn.log_model(
-            sk_model=rf_model,
-            artifact_path="model",  # Ini adalah nama folder artefak
-            input_example=X_train.head() # Contoh input untuk schema
-        )
-        
-        print(f"Random Forest - Test R2: {test_metrics['r2']:.4f}, Test MAPE: {test_metrics['mape']:.2f}%")
-        print("✅ Model, metrics, and plots logged successfully for CI/CD.")
+    
+    # --- Blok ini sudah tidak di-indent (tidak menjorok) ---
+    
+    # --- Model Definition ---
+    params = {
+        "n_estimators": 100,
+        "max_depth": 15,
+        "min_samples_split": 5,
+        "random_state": 42,
+        "n_jobs": -1
+    }
+    rf_model = RandomForestRegressor(**params)
+    rf_model.fit(X_train, y_train)
+    
+    # --- Predictions ---
+    y_pred_test = rf_model.predict(X_test)
+    
+    # --- Metrics ---
+    test_metrics = calculate_forecasting_metrics(y_test, y_pred_test)
+    
+    # --- Logging to MLflow ---
+    # Log ini akan otomatis terhubung ke Run yang dibuat oleh 'mlflow run'
+    print("Logging parameters, metrics, and model to MLflow...")
+    
+    # 1. Log Parameters
+    mlflow.log_params(params)
+    
+    # 2. Log Metrics
+    test_metrics_renamed = {f"test_{k}": v for k, v in test_metrics.items()}
+    mlflow.log_metrics(test_metrics_renamed)
+    
+    # 3. Log Artifact (Plot)
+    plot_file = create_forecast_visualization(y_test, y_pred_test, "Random Forest", X_test.index)
+    mlflow.log_artifact(plot_file)
+    
+    # 4. Log Model (Paling Penting)
+    mlflow.sklearn.log_model(
+        sk_model=rf_model,
+        artifact_path="model",  # Ini adalah nama folder artefak
+        input_example=X_train.head() # Contoh input untuk schema
+    )
+    
+    print(f"Random Forest - Test R2: {test_metrics['r2']:.4f}, Test MAPE: {test_metrics['mape']:.2f}%")
+    print("✅ Model, metrics, and plots logged successfully for CI/CD.")
 
 if __name__ == "__main__":
     train_single_model_for_ci()
