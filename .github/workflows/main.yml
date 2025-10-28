@@ -35,7 +35,7 @@ jobs:
       # 4. [SKILLED - 3 Pts] Simpan 'mlruns' sebagai artefak
       # Ini mengambil folder 'mlruns' dan menyimpannya di GitHub
       - name: (SKILLED) Upload MLflow artifacts (mlruns)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mlflow-artifacts-model # Nama artefak
           path: mlruns/ # Folder yang di-upload
