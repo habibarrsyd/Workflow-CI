@@ -55,8 +55,19 @@ jobs:
       - name: (ADVANCE) Build Docker Image with MLflow
         shell: bash -l {0}
         run: |
-          mlflow build-docker --model-uri ./MLProject --name "${{ secrets.DOCKERHUB_USERNAME }}/nama-image-anda:latest"
+          # 1. Temukan path ke model yang dihasilkan oleh 'mlflow run' sebelumnya
+          MODEL_URI=$(find mlruns -path "*/artifacts/model" | tail -n 1)
+          
+          if [ -z "$MODEL_URI" ]; then
+            echo "Error: Tidak dapat menemukan model artifact di folder 'mlruns'."
+            exit 1
+          fi
 
+          echo "Model URI ditemukan di: $MODEL_URI"
+          
+          # 2. Build image menggunakan 'mlflow models build-docker' (perintah yang benar)
+          #    dan $MODEL_URI (path yang benar)
+          mlflow models build-docker --model-uri "$MODEL_URI" --name "${{ secrets.DOCKERHUB_USERNAME }}/nama-image-anda:latest"
       # 7. Push Docker Image ke Docker Hub
       # GANTI 'nama-image-anda' dengan nama yang SAMA
       - name: (ADVANCE) Push Docker Image to Docker Hub
