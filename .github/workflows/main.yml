@@ -51,7 +51,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # 6. Build Docker Image
-      # GANTI 'ci-worklows-anda' dengan nama yang Anda inginkan
+      # GANTI 'ci-worklows' dengan nama yang Anda inginkan
       - name: (ADVANCE) Build Docker Image with MLflow
         shell: bash -l {0}
         run: |
@@ -67,9 +67,9 @@ jobs:
           
           # 2. Build image menggunakan 'mlflow models build-docker' (perintah yang benar)
           #    dan $MODEL_URI (path yang benar)
-          mlflow models build-docker --model-uri "$MODEL_URI" --name "${{ secrets.DOCKERHUB_USERNAME }}/ci-worklows:latest"
+          mlflow models build-docker --model-uri "$MODEL_URI" --name "${{ secrets.DOCKERHUB_USERNAME }}/ci-workflows:latest"
       # 7. Push Docker Image ke Docker Hub
       # GANTI 'ci-worklows-anda' dengan nama yang SAMA
       - name: (ADVANCE) Push Docker Image to Docker Hub
         run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/ci-worklows-anda:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/ci-workflows:latest
